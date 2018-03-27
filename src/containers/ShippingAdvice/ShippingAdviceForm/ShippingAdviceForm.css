@@ -1,0 +1,9 @@
+.ShippingAdviceForm {
+    margin-top: 10px !important;
+    background: rgba(178, 186, 187,0.2) !important;
+}
+
+.Form {
+    background: rgba(80, 123, 106, 0.6) !important;
+    border: 1px solid #888 !important;    
+}
