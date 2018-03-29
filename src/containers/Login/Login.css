@@ -1,0 +1,27 @@
+.Login {
+    width: 480px;
+    display: table;
+    margin: 0 auto;
+    margin-top: 90px;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 376px) {
+    .Login {
+        width: 80%;
+    }
+}
+
+
+

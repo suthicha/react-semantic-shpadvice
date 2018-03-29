@@ -8,10 +8,21 @@ import './Navbar.css';
 
 const navbar = props => {
     let menuItemClasses = [classes.NavbarMenuItem];
+
     let menuItems = (
+        <Menu.Menu position="right">
+            <Menu.Item className={classes.Item}>
+                <Button icon onClick={(event)=> props.clickMenu(event, '/login')} className={classes.Button} color="blue">
+                <Icon name="user" size="large" />
+                Login</Button>
+            </Menu.Item>
+        </Menu.Menu>);
+
+    if (props.isAuth){
+        menuItems = (
             <Menu.Menu position="right">
-                <Menu.Item active={props.pathname === '/shipping-advice'} className={menuItemClasses.join(' ')}>
-                    <Link to="/shipping-advice">
+                <Menu.Item active={props.pathname === '/shipping-adv'} className={menuItemClasses.join(' ')}>
+                    <Link to="/shipping-adv">
                         <Icon name="unordered list" size="large" />
                         Shipping Advice
                     </Link>
@@ -27,12 +38,13 @@ const navbar = props => {
                     Settings</Link>
                 </Menu.Item>
                 <Menu.Item>
-                    <Button icon color="google plus" onClick={(event) => props.menuClicked(event, '/signout')} className={classes.Button}>
+                    <Button icon color="google plus" onClick={(event) => props.clickMenu(event, '/logout')} className={classes.Button}>
                     <Icon name="sign out" size="large" />
-                    Sign Out</Button>
+                    Logout</Button>
                 </Menu.Item>
             </Menu.Menu>
         );
+    };
 
     return (
         <Menu secondary className={classes.MainMenu}>

@@ -1,0 +1,32 @@
+.Center {
+    text-align: center !important;
+}
+
+.Number {
+    text-align: right !important;
+    text-indent: 5px;
+}
+
+.Row {
+    animation: FadeInDown ease 0.5s;
+}
+
+.RowEdit {
+    background: rgb(214, 214, 214) !important;
+} 
+
+.RowEdit:hover {
+    background-color: rgb(24, 175, 74);
+    transition: background 0.5s linear;    
+}
+
+@keyframes FadeInDown{
+    0% {
+      opacity:0;
+      transform:  translate(0px,-25px)  ;
+    }
+    100% {
+      opacity:1;
+      transform:  translate(0px,0px)  ;
+    }
+}

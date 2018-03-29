@@ -9,6 +9,7 @@ import './index.css';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import { reducer as notifications } from 'react-notification-system-redux';
+import authReducer from './store/reducers/authReducer';
 import shippingAdvExportReducer from './store/reducers/shippingAdvExportReducer';
 
 // const history = createBrowserHistory();
@@ -16,6 +17,7 @@ const composeEnhancers = process.env.NODE_ENV === 'development' ? window.__REDUX
 
 const rootReducer = combineReducers({
     notifications,
+    authAgent: authReducer,
     shippingAdvExportAgent: shippingAdvExportReducer,
 });
 

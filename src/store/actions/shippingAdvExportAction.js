@@ -1,5 +1,6 @@
+import _ from 'lodash';
 import * as actionTypes from './actionTypes';
-import { successAlert, warningAlert, errorAlert } from './notificationAction';
+import { successAlert, errorAlert } from './notificationAction';
 import { promiseTimeout } from '../../shared/utility';
 import axios from '../../axios-local';
 
@@ -94,6 +95,41 @@ export const fetchShippingAdvExport = (fromdate, todate) => {
     }
 };
 
+export const fetchShippingAdvExportByRef = (refno) => {
+    return dispatch => {
+        dispatch(fetchShippingAdvExportStart());
+        const token = localStorage.getItem('token');
+
+        const promise = promiseTimeout(500, axios.get(`/shipment/${refno}?token=${token}`));
+
+        promise.then(res => {
+            localStorage.setItem('shipExports', JSON.stringify(res.data.shipments));
+            dispatch(fetchShippingAdvExportSuccess(res.data.shipments));
+            dispatch(successAlert('fetch shipping advice', 'found data '+ res.data.shipments.length + ' rec.'));
+        })
+        .catch(err => {
+            dispatch(fetchShippingAdvExportFail(err));
+            dispatch(errorAlert('fetch shipping advice', err));
+        })
+    }
+};
+
+
+export const fetchShippingAdvExportFromCache = () => {
+    return dispatch => {
+        dispatch(fetchShippingAdvExportStart());
+        try{
+            setTimeout(()=>{
+                const shipexportCache = JSON.parse(localStorage.getItem('shipExports'));
+                dispatch(fetchShippingAdvExportSuccess(shipexportCache));
+                dispatch(successAlert('fetch shippinf advice', 'load from cache success.'));
+    
+            },500);
+            
+        }catch(e){}
+    }
+};
+
 export const insertShippingAdvExport = (data) => {
     return dispatch => {
         dispatch(insertShippingAdvExportStart());
@@ -119,10 +155,12 @@ export const insertShippingAdvExport = (data) => {
                     shipExports.push(shipmentItem);            
                 }
         
-                localStorage.setItem('shipExports', JSON.stringify(shipExports));
+                const sortShipExport = _.orderBy(shipExports, ['TrxNo'],['desc'])
+
+                localStorage.setItem('shipExports', JSON.stringify(sortShipExport));
                 dispatch(insertShippingAdvExportSuccess());
                 dispatch(successAlert('insert shipping advice', 'create success.'))
-                dispatch(fetchShippingAdvExportSuccess(shipexportCache));
+                dispatch(fetchShippingAdvExportSuccess(sortShipExport));
 
             }catch(e){}
 
@@ -141,7 +179,7 @@ export const updateShippingAdvExport = (data) => {
         const token = localStorage.getItem('token');
         const shipment = fillShipment(data);
 
-        const shipexportCache = localStorage.getItem('shipExports');
+        const shipexportCache = JSON.parse(localStorage.getItem('shipExports'));
         const index = shipexportCache.findIndex(q => q.TrxNo === data.TrxNo);
                 
         const promise = promiseTimeout(500, axios.patch(`/shipment?token=${token}`, shipment));

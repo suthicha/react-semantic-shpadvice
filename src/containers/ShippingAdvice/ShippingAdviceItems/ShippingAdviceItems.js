@@ -7,10 +7,8 @@ const shippingAdviceItems = props => {
     if(!props.items){
         return (
             <Table.Row>
-                <Table.Cell colSpan='10'>
-                <Dimmer active inverted>
-                    <Loader>Loading</Loader>
-                </Dimmer>
+                <Table.Cell colSpan='16'>
+                    <h2>Find not found...</h2>
                 </Table.Cell>
             </Table.Row>
         );

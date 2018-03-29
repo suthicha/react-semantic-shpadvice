@@ -23,6 +23,15 @@ export const warningAlert = (title, message, position) => {
 };
 
 export const errorAlert = (title, err) => {
+    const { response } = err;
+    if (!response){
+        return error({
+            title: title.toUpperCase(),
+            message: '404: URL ERROR',
+            position: 'br',
+            autoDismiss: 0
+        });
+    }
     return error({
         title: title.toUpperCase(),
         message: err.response.status + ':' + err.response.statusText + ',' + err.response.data.message,

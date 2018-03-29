@@ -1,9 +1,12 @@
+import _ from 'lodash';
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Message, Form, Button, Input } from 'semantic-ui-react';
+import { Message, Form, Button, Icon } from 'semantic-ui-react';
 import InputField from '../../../components/UI/InputField/InputField';
 import NumericInputField from '../../../components/UI/NumericInputField/NumericInputField';
 import * as actions from '../../../store/actions';
+import { warningAlert } from '../../../store/actions/notificationAction';
 import classes from './ShippingAdviceForm.css';
 
 class ShippingAdviceForm extends Component {
@@ -51,6 +54,28 @@ class ShippingAdviceForm extends Component {
         this.bindPropsToState();
     };
 
+    componentWillReceiveProps(nextProps){
+
+        if (!nextProps.loading && nextProps.success){
+            _.delay(()=>{
+
+                const keys = Object.keys(this);        
+                for(var i = 0; i < keys.length; i++){
+                    if (keys[i].indexOf('Field') >= 0){
+                        try{
+                        this[keys[i]].updateValue('');
+                        }catch(e){}
+                    }
+                }
+                this.__measurementField.updateValue('0');
+                this.__muesureunitField.updateValue('CBM');
+
+            }, 200);
+            
+        }
+
+    };
+
     render(){
         const formClass = ['attached','fluid','segment', classes.Form];
 
@@ -58,6 +83,7 @@ class ShippingAdviceForm extends Component {
             <div className={classes.ShippingAdviceForm}>
                 <Message 
                     attached
+                    icon="database"
                     header="Shipment Information"
                     content="Fill out the form below to send data transfer."
                 />
@@ -214,29 +240,52 @@ class ShippingAdviceForm extends Component {
                         </Form.Field>
                     </Form.Group>
                     <Button 
+                        icon
                         type="submit" 
                         color="green"
                         loading={this.props.loading}>
+                        <Icon name="send outline" />
                         Send data Transfer
                     </Button>
+                    <Button 
+                        icon
+                        type="cancel" 
+                        color="orange"
+                        floated="right"
+                        onClick={this.props.clickCancel}>
+                        <Icon name="close" />
+                        Cancel
+                    </Button>
+                    
                 </Form>
             </div>
         );
     };
 
     handlerSubmit = () => {
+        const invno = this.__invnoField.getValue();
 
-        let data = {};
-        const keys = Object.keys(this);        
-        for(var i = 0; i < keys.length; i++){
-            if (keys[i].indexOf('__') >= 0){
-                try {
-                const control = this[keys[i]].getProps();
-                data[control.id]=control.value;
-                }catch(e){}
+        if (invno.value === ""){
+            this.context.store.dispatch(warningAlert(
+                'validate',
+                'please enter invoice no.'
+            ))
+           return;
+        }else {
+            let data = {};
+            const keys = Object.keys(this);        
+            for(var i = 0; i < keys.length; i++){
+                if (keys[i].indexOf('__') >= 0){
+                    try {
+                        const control = this[keys[i]].getProps();
+                        data[control.id]=control.value;
+                    }catch(e){}
+                }
             }
+    
+            this.props.onInsertShippingAdv(data);
         }
-        this.props.onInsertShippingAdv(data);
+
     };
 };
 
@@ -245,7 +294,7 @@ const mapStateToProps = state => {
     return {
         loading: state.shippingAdvExportAgent.processing,
         error: state.shippingAdvExportAgent.execError,
-        success: state.shippingAdvExportAgent.execStatus == 'OK'? true : false,
+        success: state.shippingAdvExportAgent.execStatus === 'OK'? true : false,
     }
 };
 
@@ -254,5 +303,13 @@ const mapDispatchToProps = dispatch => {
         onInsertShippingAdv: (data) => dispatch(actions.insertShippingAdvExport(data))
     }
 };
+
+ShippingAdviceForm.propTypes = {
+    clickCancel: PropTypes.func,
+}
+
+ShippingAdviceForm.contextTypes={
+    store: PropTypes.object
+}
 
 export default connect(mapStateToProps, mapDispatchToProps)(ShippingAdviceForm);

@@ -24,6 +24,10 @@ class InputField extends Component {
         return this.props.id
     };
 
+    updateValue(newVal){
+        this.setState({ value: newVal });
+    };
+
     componentDidMount() {
         if (this.props.value){
             this.setState({value: this.props.value});

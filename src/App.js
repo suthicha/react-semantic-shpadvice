@@ -3,15 +3,18 @@ import { connect } from 'react-redux';
 import { Route, Switch, withRouter } from 'react-router-dom';
 
 import './App.css';
+import * as actions from './store/actions/index';
 import asyncComponent from './hoc/asyncComponent/asyncComponent';
 import Layout from './hoc/Layout/Layout';
+import ProtectedRoute from './hoc/ProtectedRoute/ProtectedRoute';
+import NotFound from './containers/NotFound/NotFound';
 
 const asyncLogin = asyncComponent(() => {
   return import('./containers/Login/Login')
 });
 
-const asyncDashboard = asyncComponent(() => {
-  return import('./containers/Dashboard/Dashboard')
+const asyncLogout = asyncComponent(() => {
+  return import('./containers/Logout/Logout')
 });
 
 const asyncShippingAdvice = asyncComponent(() => {
@@ -21,27 +24,36 @@ const asyncShippingAdvice = asyncComponent(() => {
 class App extends Component {
   
   componentDidMount(){
-
+    this.props.onTryAutoSignup(this.props.location.pathname);
   };
 
   render() {
     const { pathname } = this.props.location;
-    const isAccessible = true;
-    const groupId = 1;
 
     let routes = (
-      <Switch>
-        <Route path="/shipping-advice" component={asyncShippingAdvice} />        
-        <Route path="/login" component={asyncLogin} />        
-        <Route path="/" exact component={asyncDashboard} />
+      <Switch>  
+        <Route path="/login" component={asyncLogin} />     
+        <ProtectedRoute redirectToPath="/login" path="*" component={NotFound} />
       </Switch>
     );
+
+    if (this.props.isAuthenticated) {
+        routes = (
+          <Switch>
+            <Route path="/login" component={asyncLogin} />
+            <Route path="/logout" component={asyncLogout} />
+            <ProtectedRoute redirectToPath="/login" path="/shipping-adv" component={asyncShippingAdvice} />
+            <Route path="/" exact component={asyncShippingAdvice} />
+            <Route path="*" component={NotFound} />
+          </Switch>
+        );
+    };
 
     return (
       <Layout 
         pathname={pathname} 
-        isAuth={isAccessible} 
-        groupId={groupId} >
+        isAuth={this.props.isAuthenticated} 
+        groupId={this.props.groupId} >
         { routes }
       </Layout>
     );
@@ -51,7 +63,15 @@ class App extends Component {
 const mapStateToProps = state => {
   return {
     notifications: state.notifications,
+    groupId: state.authAgent.groupId,
+    isAuthenticated: state.authAgent.token !== null,
   }
 };
 
-export default withRouter(connect(mapStateToProps)(App));
+const mapDispatchToProps = dispatch => {
+  return {
+    onTryAutoSignup: (path) => dispatch(actions.authCheckState(path))
+  }
+};
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));
